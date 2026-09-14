@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template_string
-import requests
+from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
 
@@ -33,44 +33,67 @@ HTML_TEMPLATE = """
 </html>
 """
 
+# Store credentials safely (or replace directly with your panel login info)
+PANEL_LOGIN_URL = "https://panel.play.hosting/auth/login"
+PANEL_EMAIL = "daisjohncvn3c@gmail.com"
+PANEL_PASSWORD = "CD9037025101"
+SERVER_URL = "https://panel.play.hosting/server/5ba25eae"
+
+
+def trigger_panel_action(button_selector):
+    with sync_playwright() as p:
+        # Launch headless browser with realistic desktop viewport
+        browser = p.chromium.launch(
+            headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"]
+        )
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
+        )
+        page = context.new_page()
+
+        # Step 1: Navigate to login and authenticate
+        page.goto(PANEL_LOGIN_URL, wait_until="networkidle")
+
+        # Fill credentials if redirected to login
+        if "login" in page.url:
+            page.fill('input[type="email"], input[name="username"]', PANEL_EMAIL)
+            page.fill('input[type="password"]', PANEL_PASSWORD)
+            page.click('button[type="submit"]')
+            page.wait_for_timeout(3000)
+
+        # Step 2: Navigate to server dashboard
+        page.goto(SERVER_URL, wait_until="networkidle")
+
+        # Step 3: Click targeted control button
+        page.click(button_selector)
+        page.wait_for_timeout(2000)
+
+        browser.close()
+
 
 @app.route("/")
 def home():
     return render_template_string(HTML_TEMPLATE)
 
 
-# Note the triple quotes (""") around the Cookie to allow multi-line strings
-HEADERS = {
-    "Authorization": "Bearer ptlc_bHDT3bkhF1x",
-    "Accept": "application/json",
-    "Content-Type": "application/json",
-}
-
-
 @app.route("/wake", methods=["POST"])
 def wake():
-    wake_url = "https://panel.play.hosting/api/client/servers/5ba25eae-2f7d-44e8-9063-2e46800cad6a/wake"
     try:
-        response = requests.post(wake_url, headers=HEADERS)
-        if response.status_code in [200, 204]:
-            return "<h3>Server is waking up! You can close this tab.</h3>"
-        return f"<h3>Failed to wake server. Status: {response.status_code}</h3>"
+        # Pass CSS selector for your panel's Wake button
+        trigger_panel_action('button:has-text("Wake")')
+        return "<h3>Wake command sent successfully!</h3>"
     except Exception as e:
-        return f"<h3>Error: {str(e)}</h3>"
+        return f"<h3>Error triggering wake action: {str(e)}</h3>"
 
 
 @app.route("/start", methods=["POST"])
 def start():
-    start_url = "https://panel.play.hosting/api/client/servers/5ba25eae-2f7d-44e8-9063-2e46800cad6a/power"
     try:
-        response = requests.post(
-            start_url, headers=HEADERS, json={"signal": "start"}
-        )
-        if response.status_code in [200, 204]:
-            return "<h3>Server turning on! You can close this tab.</h3>"
-        return f"<h3>Failed to start server. Status: {response.status_code}</h3>"
+        # Pass CSS selector for your panel's Start button
+        trigger_panel_action('button:has-text("Start")')
+        return "<h3>Start command sent successfully!</h3>"
     except Exception as e:
-        return f"<h3>Error: {str(e)}</h3>"
+        return f"<h3>Error triggering start action: {str(e)}</h3>"
 
 
 if __name__ == "__main__":
