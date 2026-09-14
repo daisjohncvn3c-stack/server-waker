@@ -4,7 +4,10 @@ os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0"
 
 from flask import Flask, render_template_string
 from playwright.sync_api import sync_playwright
+app = Flask(__name__)
 
+# REPLACE WITH YOUR BROWSERLESS API TOKEN
+BROWSERLESS_TOKEN = "YOUR_BROWSERLESS_API_TOKEN"
 # Rest of your app.py code continues below...
 
 app = Flask(__name__)
