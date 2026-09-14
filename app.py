@@ -1,6 +1,11 @@
 import os
+
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "0"
+
 from flask import Flask, render_template_string
 from playwright.sync_api import sync_playwright
+
+# Rest of your app.py code continues below...
 
 app = Flask(__name__)
 
