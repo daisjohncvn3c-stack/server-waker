@@ -54,8 +54,8 @@ HEADERS = {
 
 @app.route("/wake", methods=["POST"])
 def wake():
-    wake_url = "https://panel.play.hosting/api/client/servers/5ba25eae-2f7d-44e8-9063-2e46800cad6a/wake
-"
+    wake_url = "https://panel.play.hosting/api/client/servers/5ba25eae-2f7d-44e8-9063-2e46800cad6a/wake"
+
     try:
         response = requests.post(wake_url, headers=HEADERS)
         if response.status_code in [200, 204]:
