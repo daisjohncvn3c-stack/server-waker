@@ -5,7 +5,7 @@ from flask import Flask, render_template_string
 app = Flask(__name__)
 
 # Configured via Render Environment Variables
-API_KEY = os.environ.get("ptlc_bHDT3bkhF1x")
+API_KEY = os.environ.get("ptlc_SfwGdnatOeFIQc6R7nNvDkZvmXIwH4EkGVhHyDVucHm")
 SERVER_ID = os.environ.get("SERVER_ID", "5ba25eae")
 PANEL_URL = f"https://panel.play.hosting/api/client/servers/{SERVER_ID}/power"
 
