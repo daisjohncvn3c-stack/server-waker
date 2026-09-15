@@ -60,11 +60,28 @@ def handle_power(signal):
     if signal not in ["start", "stop", "restart", "kill"]:
         return "Invalid signal", 400
         
-    success = send_power_signal(signal)
-    if success:
-        return f"<h3>Successfully sent '{signal}' signal!</h3><a href='/'>Go Back</a>"
-    else:
-        return f"<h3>Failed to send '{signal}' signal. Check API Key/Permissions.</h3><a href='/'>Go Back</a>"
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    payload = {"signal": signal}
+    
+    try:
+        response = requests.post(PANEL_URL, json=payload, headers=headers, timeout=10)
+        
+        # Display exact response details if it fails
+        if response.status_code in [200, 204]:
+            return f"<h3>Successfully sent '{signal}' signal!</h3><a href='/'>Go Back</a>"
+        else:
+            return f"""
+            <h3>Failed to send '{signal}' signal.</h3>
+            <p><b>Status Code:</b> {response.status_code}</p>
+            <p><b>Response Body:</b> {response.text}</p>
+            <a href='/'>Go Back</a>
+            """
+    except Exception as e:
+        return f"<h3>Error: {str(e)}</h3><a href='/'>Go Back</a>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
